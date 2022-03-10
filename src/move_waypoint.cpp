@@ -5,6 +5,7 @@ Move_waypoints::Move_waypoints() : as_(NULL)
     as_ = new server(nh_, "move_base", boost::bind(&Move_waypoints::action, this, _1), false);
     as_->start();
     cmd_vel_ = nh_.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+    state_ = 0;
 }
 
 Move_waypoints::~Move_waypoints()
@@ -32,11 +33,22 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &goal)
         tf2::Quaternion q(transformStamped.transform.rotation.x, transformStamped.transform.rotation.y, transformStamped.transform.rotation.z, transformStamped.transform.rotation.w);
         double temp1, temp2, yaw;
         tf2::Matrix3x3(q).getRPY(temp1, temp2, yaw);
-
-        cmd_vel.angular.z = turn2goal(transformStamped, goal, yaw);
-        cmd_vel.angular.x = 0;      
-        //move2goal(transformStamped, goal, cmd_vel);
-        //endturn();
+        if (state_ == 0){
+            cmd_vel.angular.z = turn2goal(transformStamped, goal, yaw);
+            cmd_vel.angular.x = 0.0;      
+        }
+        else if (state_ == 1){
+            cmd_vel.angular.z = turn2goal(transformStamped, goal, yaw);
+            cmd_vel.angular.x = 0.2;    
+        }
+        else if (state_ == 2){
+            cmd_vel.angular.z = endturn(transformStamped, goal, yaw);
+            cmd_vel.angular.x = 0.0;    
+        }
+        else{
+            cmd_vel.angular.z = 0.0;
+            cmd_vel.angular.x = 0.0;   
+        }
 
         cmd_vel_.publish(cmd_vel);
 
@@ -50,7 +62,10 @@ double Move_waypoints::turn2goal(const geometry_msgs::TransformStamped &transfor
     double temp1, temp2, goal_head;
     temp1 = goal->target_pose.pose.position.x - transformStamped.transform.translation.x;
     temp2 = goal->target_pose.pose.position.y - transformStamped.transform.translation.y;
-    goal_head = (yaw - atan2(temp2, temp1))*0.3;
+    goal_head = (atan2(temp2, temp1) - yaw)*0.3;
+    if (goal_head < 0.3 && state_ == 0) goal_head = 0.3;
+    else if (goal_head < 0.1 && state_ == 0) state_++;
+    else if (sqrt( pow(temp1,2) + pow(temp2,2) ) < 0.2 && state_ == 1) state_++; 
 
     return goal_head;
 }

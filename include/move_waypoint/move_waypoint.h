@@ -33,6 +33,7 @@ private:
 protected:
     ros::NodeHandle nh_;
     ros::Publisher cmd_vel_;
+    int8_t state_;
     tf2_ros::Buffer tfBuffer_;
     server* as_;
 };
