@@ -45,10 +45,18 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &goal)
             cmd_vel.angular.z = endturn(transformStamped, goal, yaw);
             cmd_vel.linear.x = 0.0;    
         }
-        else{
+        else if (state_ == 3){
             cmd_vel.angular.z = 0.0;
             cmd_vel.linear.x = 0.0;
             state_ = 0;
+            as_->setSucceeded(move_base_msgs::MoveBaseResult(), "Goal reached.");
+            break;
+        }
+        else {
+            cmd_vel.angular.z = 0.0;
+            cmd_vel.linear.x = 0.0;
+            state_ = 0;
+            as_->setAborted(move_base_msgs::MoveBaseResult(), "Failed to Goal reached.");
             break;
         }
 
@@ -83,14 +91,14 @@ double Move_waypoints::endturn(const geometry_msgs::TransformStamped &transformS
     if (goal_head < 0.05 && state_ == 2) state_++;
     else if (goal_head < 0.3 && state_ == 2) goal_head = 0.3;
 
-    cout << " value : " << goal->target_pose.pose.orientation.x << " value : " <<
-    goal->target_pose.pose.orientation.y << " value : " <<
-    goal->target_pose.pose.orientation.z << " value : " <<
-    goal->target_pose.pose.orientation.w << endl;
+    // cout << " value : " << goal->target_pose.pose.orientation.x << " value : " <<
+    // goal->target_pose.pose.orientation.y << " value : " <<
+    // goal->target_pose.pose.orientation.z << " value : " <<
+    // goal->target_pose.pose.orientation.w << endl;
 
-    cout << "goal_yaw : " << goal_yaw << endl;
-    cout << "state : " << state_ << endl;
-    cout << "goal_head : " << goal_head << endl;
+    // cout << "goal_yaw : " << goal_yaw << endl;
+    // cout << "state : " << state_ << endl;
+    // cout << "goal_head : " << goal_head << endl;
 
     return goal_head;
 }
