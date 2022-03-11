@@ -35,23 +35,25 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &goal)
         tf2::Matrix3x3(q).getRPY(temp1, temp2, yaw);
         if (state_ == 0){
             cmd_vel.angular.z = turn2goal(transformStamped, goal, yaw);
-            cmd_vel.angular.x = 0.0;      
+            cmd_vel.linear.x = 0.0;      
         }
         else if (state_ == 1){
             cmd_vel.angular.z = turn2goal(transformStamped, goal, yaw);
-            cmd_vel.angular.x = 0.2;    
+            cmd_vel.linear.x = 0.2;    
         }
         else if (state_ == 2){
             cmd_vel.angular.z = endturn(transformStamped, goal, yaw);
-            cmd_vel.angular.x = 0.0;    
+            cmd_vel.linear.x = 0.0;    
         }
         else{
             cmd_vel.angular.z = 0.0;
-            cmd_vel.angular.x = 0.0;   
+            cmd_vel.linear.x = 0.0;
+            state_ = 0;
+            break;
         }
 
         cmd_vel_.publish(cmd_vel);
-
+        
         ros::spinOnce();
         rate.sleep();
     }
@@ -63,9 +65,10 @@ double Move_waypoints::turn2goal(const geometry_msgs::TransformStamped &transfor
     temp1 = goal->target_pose.pose.position.x - transformStamped.transform.translation.x;
     temp2 = goal->target_pose.pose.position.y - transformStamped.transform.translation.y;
     goal_head = (atan2(temp2, temp1) - yaw)*0.3;
-    if (goal_head < 0.3 && state_ == 0) goal_head = 0.3;
-    else if (goal_head < 0.1 && state_ == 0) state_++;
-    else if (sqrt( pow(temp1,2) + pow(temp2,2) ) < 0.2 && state_ == 1) state_++; 
+    if (sqrt( pow(temp1,2) + pow(temp2,2) ) < 0.2 && state_ == 1) state_++; 
+    else if (goal_head < 0.05 && state_ == 0) state_++;
+    else if (goal_head < 0.3 && state_ == 0) goal_head = 0.3;
+    
 
     return goal_head;
 }
@@ -77,6 +80,17 @@ double Move_waypoints::endturn(const geometry_msgs::TransformStamped &transformS
     double temp1, temp2, goal_yaw;
     tf2::Matrix3x3(q).getRPY(temp1, temp2, goal_yaw);
     goal_head = goal_yaw - yaw;
+    if (goal_head < 0.05 && state_ == 2) state_++;
+    else if (goal_head < 0.3 && state_ == 2) goal_head = 0.3;
+
+    cout << " value : " << goal->target_pose.pose.orientation.x << " value : " <<
+    goal->target_pose.pose.orientation.y << " value : " <<
+    goal->target_pose.pose.orientation.z << " value : " <<
+    goal->target_pose.pose.orientation.w << endl;
+
+    cout << "goal_yaw : " << goal_yaw << endl;
+    cout << "state : " << state_ << endl;
+    cout << "goal_head : " << goal_head << endl;
 
     return goal_head;
 }
