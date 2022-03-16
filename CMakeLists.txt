@@ -10,6 +10,7 @@ project(move_waypoint)
 find_package(catkin REQUIRED COMPONENTS
   actionlib
   geometry_msgs
+  nav_msgs
   move_base_msgs
   roscpp
   std_msgs
@@ -18,13 +19,13 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 generate_messages(
-  DEPENDENCIES actionlib_msgs std_msgs move_base_msgs
+  DEPENDENCIES actionlib_msgs std_msgs move_base_msgs nav_msgs
 )
 
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES move_waypoint
-  CATKIN_DEPENDS actionlib geometry_msgs move_base_msgs roscpp std_msgs tf2 tf2_ros
+  CATKIN_DEPENDS actionlib geometry_msgs move_base_msgs roscpp std_msgs tf2 tf2_ros nav_msgs
 #  DEPENDS system_lib
 )
 

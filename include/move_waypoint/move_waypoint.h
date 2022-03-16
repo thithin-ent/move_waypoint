@@ -9,6 +9,7 @@
 #include "ros/ros.h"
 #include <ros/package.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <nav_msgs/Path.h>
 #include <geometry_msgs/Twist.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <tf2/LinearMath/Quaternion.h>
@@ -33,6 +34,7 @@ private:
 protected:
     ros::NodeHandle nh_;
     ros::Publisher cmd_vel_;
+    ros::Publisher path_plan_;
     int state_;
     tf2_ros::Buffer tfBuffer_;
     server* as_;

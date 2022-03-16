@@ -5,7 +5,7 @@ Move_waypoints::Move_waypoints() : as_(NULL)
     as_ = new server(nh_, "move_base", boost::bind(&Move_waypoints::action, this, _1), false);
     as_->start();
     cmd_vel_ = nh_.advertise<geometry_msgs::Twist>("cmd_vel", 1);
-    state_ = 0;
+    cmd_vel_ = nh_.advertise<nav_msgs::Path>("waypoint_path", 1);
 }
 
 Move_waypoints::~Move_waypoints()
@@ -17,7 +17,17 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &goal)
     tf2_ros::TransformListener tfListener(tfBuffer_);
     ros::Rate rate(20.0);
     geometry_msgs::TransformStamped transformStamped;
+    geometry_msgs::PoseStamped pose;
     geometry_msgs::Twist cmd_vel;
+    
+    nav_msgs::Path path;
+    path.header = goal->target_pose.header;
+    pose.header = goal->target_pose.header;
+    pose.pose = goal->target_pose.pose;
+    path.poses.push_back(pose);
+    path.poses.push_back(pose);
+    
+    state_ = 0;
     while (nh_.ok())
     {
         try
@@ -62,6 +72,17 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &goal)
 
         cmd_vel_.publish(cmd_vel);
         
+        pose.header = goal->target_pose.header;
+        pose.pose.position.x = transformStamped.transform.translation.x;
+        pose.pose.position.y = transformStamped.transform.translation.y;
+        pose.pose.position.z = transformStamped.transform.translation.z;
+        pose.pose.orientation = transformStamped.transform.rotation;
+        
+        path.poses.emplace(path.poses.begin() + 1,pose);
+
+
+
+
         ros::spinOnce();
         rate.sleep();
     }
