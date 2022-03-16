@@ -27,11 +27,13 @@ public:
     Move_waypoints();
     ~Move_waypoints();
     void action(const move_base_msgs::MoveBaseGoalConstPtr& goal);
-    double turn2goal(const geometry_msgs::TransformStamped &transformStamped, const move_base_msgs::MoveBaseGoalConstPtr &goal, const double &yaw);
-    double endturn(const geometry_msgs::TransformStamped &transformStamped, const move_base_msgs::MoveBaseGoalConstPtr &goal, const double &yaw);
+    double turn2goal(const geometry_msgs::TransformStamped &transformStamped, const geometry_msgs::PoseStamped &goal, const double &yaw);
+    double endturn(const geometry_msgs::TransformStamped &transformStamped, const geometry_msgs::PoseStamped &goal, const double &yaw);
+    void planpub(const geometry_msgs::PoseStamped &goal, const geometry_msgs::TransformStamped &transformStamped);
 private:
 
 protected:
+    move_base_msgs::MoveBaseResult result_;
     ros::NodeHandle nh_;
     ros::Publisher cmd_vel_;
     ros::Publisher path_plan_;
