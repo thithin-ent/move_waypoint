@@ -14,18 +14,19 @@ find_package(catkin REQUIRED COMPONENTS
   move_base_msgs
   roscpp
   std_msgs
+  sensor_msgs
   tf2
   tf2_ros
 )
 
-generate_messages(
-  DEPENDENCIES actionlib_msgs std_msgs move_base_msgs nav_msgs
-)
+#generate_messages(
+#  DEPENDENCIES actionlib_msgs std_msgs move_base_msgs nav_msgs
+#)
 
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES move_waypoint
-  CATKIN_DEPENDS actionlib geometry_msgs move_base_msgs roscpp std_msgs tf2 tf2_ros nav_msgs
+  CATKIN_DEPENDS actionlib geometry_msgs move_base_msgs roscpp std_msgs tf2 tf2_ros nav_msgs sensor_msgs
 #  DEPENDS system_lib
 )
 
@@ -40,6 +41,8 @@ include_directories(
 add_executable(move_waypoint src/move_waypoint.cpp src/move_waypoint_node.cpp)
 target_link_libraries(move_waypoint ${catkin_LIBRARIES})
 
+add_executable(obstacle_check src/obstacle_check.cpp src/obstacle_check_node.cpp)
+target_link_libraries(obstacle_check ${catkin_LIBRARIES})
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
