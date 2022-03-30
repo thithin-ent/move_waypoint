@@ -11,6 +11,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/Twist.h>
+#include <std_msgs/Bool.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/utils.h>
@@ -30,6 +31,7 @@ public:
     double turn2goal(const geometry_msgs::TransformStamped &transformStamped, const geometry_msgs::PoseStamped &goal, const double &yaw);
     double endturn(const geometry_msgs::TransformStamped &transformStamped, const geometry_msgs::PoseStamped &goal, const double &yaw);
     void planpub(const geometry_msgs::PoseStamped &goal, const geometry_msgs::TransformStamped &transformStamped);
+    void obcheck_callback(const std_msgs::Bool::ConstPtr &data);
 private:
 
 protected:
@@ -37,7 +39,9 @@ protected:
     ros::NodeHandle nh_;
     ros::Publisher cmd_vel_;
     ros::Publisher path_plan_;
+    ros::Subscriber obcheck_sub_;
     int state_;
+    bool obcheck_;
     tf2_ros::Buffer tfBuffer_;
     server* as_;
 };

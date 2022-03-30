@@ -6,10 +6,16 @@ Move_waypoints::Move_waypoints() : as_(NULL)
     as_->start();
     cmd_vel_ = nh_.advertise<geometry_msgs::Twist>("cmd_vel", 1);
     path_plan_ = nh_.advertise<nav_msgs::Path>("waypoint_path", 1);
+    obcheck_sub_ = nh_.subscribe("obstacle_check", 1, &Move_waypoints::obcheck_callback, this);
 }
 
 Move_waypoints::~Move_waypoints()
 {
+}
+
+void Move_waypoints::obcheck_callback(const std_msgs::Bool::ConstPtr &data)
+{
+    obcheck_ = data->data;
 }
 
 void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &waypoint_goal)
@@ -19,14 +25,10 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &waypoint
     geometry_msgs::TransformStamped transformStamped;
     geometry_msgs::PoseStamped goal;
     geometry_msgs::Twist cmd_vel;
-    
-    
-    
+
     goal.header.stamp = ros::Time::now();
     goal.header.frame_id = "map";
     goal.pose = waypoint_goal->target_pose.pose;
-    
-
     
     state_ = 0;
     while (nh_.ok())
@@ -53,7 +55,12 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &waypoint
         tf2::Quaternion q(transformStamped.transform.rotation.x, transformStamped.transform.rotation.y, transformStamped.transform.rotation.z, transformStamped.transform.rotation.w);
         double temp1, temp2, yaw;
         tf2::Matrix3x3(q).getRPY(temp1, temp2, yaw);
-        if (state_ == 0){
+        
+        if (!obcheck_){
+            cmd_vel.angular.z = 0.0;
+            cmd_vel.linear.x = 0.0;  
+        }
+        else if (state_ == 0){
             cmd_vel.angular.z = turn2goal(transformStamped, goal, yaw);
             cmd_vel.linear.x = 0.0;      
         }
@@ -69,7 +76,7 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &waypoint
             cmd_vel.angular.z = 0.0;
             cmd_vel.linear.x = 0.0;
             state_ = 0;
-            cout << " success " << endl;
+            //cout << " success " << endl;
             as_->setSucceeded(move_base_msgs::MoveBaseResult(), "Goal reached.");
             break;
         }
@@ -78,7 +85,7 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &waypoint
             cmd_vel.linear.x = 0.0;
             state_ = 0;
             as_->setAborted(move_base_msgs::MoveBaseResult(), "Failed to Goal reached.");
-            cout << " fail " << endl;
+            //cout << " fail " << endl;
             break;
         }
 
@@ -123,15 +130,6 @@ double Move_waypoints::endturn(const geometry_msgs::TransformStamped &transformS
         else goal_head = 0.3;
     } 
 
-    // cout << " value : " << goal->target_pose.pose.orientation.x << " value : " <<
-    // goal->target_pose.pose.orientation.y << " value : " <<
-    // goal->target_pose.pose.orientation.z << " value : " <<
-    // goal->target_pose.pose.orientation.w << endl;
-
-    // cout << "goal_yaw : " << goal_yaw << endl;
-    // cout << "state : " << state_ << endl;
-    // cout << "goal_head : " << goal_head << endl;
-
     return goal_head;
 }
 
@@ -150,3 +148,4 @@ void Move_waypoints::planpub(const geometry_msgs::PoseStamped &goal, const geome
     path.poses.push_back(pose);
     path_plan_.publish(path);
 }
+
