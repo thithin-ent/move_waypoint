@@ -1,0 +1,6 @@
+<launch>
+  
+  <node pkg="move_waypoint" type="obstacle_check" name="obstacle_check"/>
+  <node pkg="move_waypoint" type="move_waypoint" name="move_waypoint" output="screen"/>
+  
+</launch>

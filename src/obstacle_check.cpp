@@ -90,7 +90,7 @@ bool Obstacle_check::obstacle_check(const vector<Vector3f> &scan_poses)
         double range = sqrt(pow(scan_poses[i](0),2) + pow(scan_poses[i](1),2));
         double angle = atan2(scan_poses[i](1), scan_poses[i](0));
         //cout << "rnage: " << range << "  " << angle << endl;
-        if (range < 0.2 && abs(angle) < 0.3){
+        if (range < 0.5 && abs(angle) < 0.3){
             return true;
             //cout << "scan_poses: " << scan_poses[i](0) << "  " << scan_poses[i](1) << endl;
         }

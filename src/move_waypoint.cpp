@@ -55,8 +55,8 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &waypoint
         tf2::Quaternion q(transformStamped.transform.rotation.x, transformStamped.transform.rotation.y, transformStamped.transform.rotation.z, transformStamped.transform.rotation.w);
         double temp1, temp2, yaw;
         tf2::Matrix3x3(q).getRPY(temp1, temp2, yaw);
-        
-        if (!obcheck_){
+        //cout << state_ << endl;
+        if (obcheck_){
             cmd_vel.angular.z = 0.0;
             cmd_vel.linear.x = 0.0;  
         }
@@ -66,7 +66,7 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &waypoint
         }
         else if (state_ == 1){
             cmd_vel.angular.z = turn2goal(transformStamped, goal, yaw);
-            cmd_vel.linear.x = 0.2;    
+            cmd_vel.linear.x = 0.5;    
         }
         else if (state_ == 2){
             cmd_vel.angular.z = endturn(transformStamped, goal, yaw);
