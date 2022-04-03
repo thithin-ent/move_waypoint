@@ -107,6 +107,16 @@ double Move_waypoints::turn2goal(const geometry_msgs::TransformStamped &transfor
     temp1 = goal.pose.position.x - transformStamped.transform.translation.x;
     temp2 = goal.pose.position.y - transformStamped.transform.translation.y;
     goal_head = (atan2(temp2, temp1) - yaw)*0.3;
+
+    if (goal_head < -M_PI)
+    {
+        goal_head = M_PI*2 - goal_head;
+    }
+    else if(goal_head > M_PI)
+    {
+        goal_head = goal_head - M_PI*2; 
+    }
+
     if (sqrt( pow(temp1,2) + pow(temp2,2) ) < 0.2 && state_ == 1) state_++; 
     else if (abs(goal_head) < 0.05 && state_ == 0) state_++;
     else if (abs(goal_head) < 0.3 && state_ == 0){
@@ -124,6 +134,16 @@ double Move_waypoints::endturn(const geometry_msgs::TransformStamped &transformS
     double temp1, temp2, goal_yaw;
     tf2::Matrix3x3(q).getRPY(temp1, temp2, goal_yaw);
     goal_head = goal_yaw - yaw;
+
+    if (goal_head < -M_PI)
+    {
+        goal_head = M_PI*2 - goal_head;
+    }
+    else if(goal_head > M_PI)
+    {
+        goal_head = goal_head - M_PI*2; 
+    }
+
     if (abs(goal_head) < 0.05 && state_ == 2) state_++;
     else if (abs(goal_head) < 0.3 && state_ == 2){
         if (goal_head < 0) goal_head = -0.3;
