@@ -22,6 +22,9 @@ Obstacle_check::Obstacle_check()
     tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
     transform_ << cos(yaw), -sin(yaw), transformStamped.transform.translation.x, sin(yaw), cos(yaw), transformStamped.transform.translation.y, 0, 0, 1;
 
+    nh_.param<double>("/obstacle_radius", radius_param_,0.5);
+    nh_.param<double>("/obstacle_radian", radian_param_,0.3);
+
     scan_sub_ = nh_.subscribe("scan", 1, &Obstacle_check::scan_callback, this);
     basescan_pub_ = nh_.advertise<sensor_msgs::PointCloud>("basepointcloud", 1);
     obCheck_pub_ = nh_.advertise<std_msgs::Bool>("obstacle_check", 1);
@@ -90,7 +93,7 @@ bool Obstacle_check::obstacle_check(const vector<Vector3f> &scan_poses)
         double range = sqrt(pow(scan_poses[i](0),2) + pow(scan_poses[i](1),2));
         double angle = atan2(scan_poses[i](1), scan_poses[i](0));
         //cout << "rnage: " << range << "  " << angle << endl;
-        if (range < 0.5 && abs(angle) < 0.3){
+        if (range < radius_param_ && abs(angle) < radian_param_){
             return true;
             //cout << "scan_poses: " << scan_poses[i](0) << "  " << scan_poses[i](1) << endl;
         }

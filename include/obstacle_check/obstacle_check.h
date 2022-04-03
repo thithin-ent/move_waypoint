@@ -39,6 +39,8 @@ private:
 protected:
     ros::NodeHandle nh_;
     ros::Subscriber scan_sub_;
+    double radius_param_;
+    double radian_param_;
     Matrix3f transform_;
     ros::Publisher basescan_pub_;
     ros::Publisher obCheck_pub_;
