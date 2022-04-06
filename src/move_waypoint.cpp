@@ -113,20 +113,24 @@ double Move_waypoints::turn2goal(const geometry_msgs::TransformStamped &transfor
     //cout << "yaw: "<<yaw << endl;
     if (goal_head < -M_PI)
     {
-        goal_head = (M_PI*2 - goal_head)*0.3;
+        goal_head = (M_PI*2 - goal_head);
     }
     else if(goal_head > M_PI)
     {
-        goal_head = (goal_head - M_PI*2)*0.3; 
+        goal_head = (goal_head - M_PI*2); 
     }
 
     if (sqrt( pow(temp1,2) + pow(temp2,2) ) < 0.2 && state_ == 1) state_++; 
     else if (abs(goal_head) < 0.05 && state_ == 0) state_++;
-    else if (abs(goal_head) < 0.15 && state_ == 0){
-        if (goal_head < 0) goal_head = -0.15;
-        else goal_head = 0.15;
-    } 
-
+    
+    
+    if (goal_head < 0){
+        goal_head = (atan(2*x-3.14)+1.6)/4;
+    }
+    else {
+        goal_head = -(atan(2*(-x1)-3.14)+1.5)/4;
+    }
+    
     return goal_head;
 }
 
@@ -140,18 +144,20 @@ double Move_waypoints::endturn(const geometry_msgs::TransformStamped &transformS
 
     if (goal_head < -M_PI)
     {
-        goal_head = (M_PI*2 - goal_head)*0.3;
+        goal_head = (M_PI*2 - goal_head);
     }
     else if(goal_head > M_PI)
     {
-        goal_head = (goal_head - M_PI*2)*0.3; 
+        goal_head = (goal_head - M_PI*2); 
     }
 
     if (abs(goal_head) < 0.05 && state_ == 2) state_++;
-    else if (abs(goal_head) < 0.15 && state_ == 2){
-        if (goal_head < 0) goal_head = -0.15;
-        else goal_head = 0.15;
-    } 
+    
+    if (goal_head < 0){
+        goal_head = (atan(2*x-3.14)+1.6)/4;
+    }
+    else {
+        goal_head = -(atan(2*(-x1)-3.14)+1.5)/4;
 
     return goal_head;
 }
