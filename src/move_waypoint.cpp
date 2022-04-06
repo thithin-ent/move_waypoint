@@ -106,22 +106,25 @@ double Move_waypoints::turn2goal(const geometry_msgs::TransformStamped &transfor
     double temp1, temp2, goal_head;
     temp1 = goal.pose.position.x - transformStamped.transform.translation.x;
     temp2 = goal.pose.position.y - transformStamped.transform.translation.y;
-    goal_head = (atan2(temp2, temp1) - yaw)*0.3;
+    goal_head = (atan2(temp2, temp1) - yaw);
 
+    //cout << "cout << goal_head << endl: "<<goal_head << endl;
+    //cout << "atan2(temp2, temp1): "<<atan2(temp2, temp1) << endl;
+    //cout << "yaw: "<<yaw << endl;
     if (goal_head < -M_PI)
     {
-        goal_head = M_PI*2 - goal_head;
+        goal_head = (M_PI*2 - goal_head)*0.3;
     }
     else if(goal_head > M_PI)
     {
-        goal_head = goal_head - M_PI*2; 
+        goal_head = (goal_head - M_PI*2)*0.3; 
     }
 
     if (sqrt( pow(temp1,2) + pow(temp2,2) ) < 0.2 && state_ == 1) state_++; 
     else if (abs(goal_head) < 0.05 && state_ == 0) state_++;
-    else if (abs(goal_head) < 0.3 && state_ == 0){
-        if (goal_head < 0) goal_head = -0.3;
-        else goal_head = 0.3;
+    else if (abs(goal_head) < 0.15 && state_ == 0){
+        if (goal_head < 0) goal_head = -0.15;
+        else goal_head = 0.15;
     } 
 
     return goal_head;
@@ -137,17 +140,17 @@ double Move_waypoints::endturn(const geometry_msgs::TransformStamped &transformS
 
     if (goal_head < -M_PI)
     {
-        goal_head = M_PI*2 - goal_head;
+        goal_head = (M_PI*2 - goal_head)*0.3;
     }
     else if(goal_head > M_PI)
     {
-        goal_head = goal_head - M_PI*2; 
+        goal_head = (goal_head - M_PI*2)*0.3; 
     }
 
     if (abs(goal_head) < 0.05 && state_ == 2) state_++;
-    else if (abs(goal_head) < 0.3 && state_ == 2){
-        if (goal_head < 0) goal_head = -0.3;
-        else goal_head = 0.3;
+    else if (abs(goal_head) < 0.15 && state_ == 2){
+        if (goal_head < 0) goal_head = -0.15;
+        else goal_head = 0.15;
     } 
 
     return goal_head;
