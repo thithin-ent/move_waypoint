@@ -30,6 +30,8 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &waypoint
     goal.header.frame_id = "map";
     goal.pose = waypoint_goal->target_pose.pose;
     
+    double speed = 0; 
+
     state_ = 0;
     while (nh_.ok())
     {
@@ -62,11 +64,13 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &waypoint
         }
         else if (state_ == 0){
             cmd_vel.angular.z = turn2goal(transformStamped, goal, yaw);
-            cmd_vel.linear.x = 0.0;      
+            cmd_vel.linear.x = 0.0;
+            speed = 0;
         }
         else if (state_ == 1){
             cmd_vel.angular.z = turn2goal(transformStamped, goal, yaw);
-            cmd_vel.linear.x = 0.5;    
+            cmd_vel.linear.x = 0.5 -  0.5*exp(-speed);
+            speed = speed + 0.1*exp(-speed+0.1);
         }
         else if (state_ == 2){
             cmd_vel.angular.z = endturn(transformStamped, goal, yaw);
@@ -88,7 +92,8 @@ void Move_waypoints::action(const move_base_msgs::MoveBaseGoalConstPtr &waypoint
             //cout << " fail " << endl;
             break;
         }
-
+        cout << "cmd_vel.angular.z: "<< cmd_vel.angular.z << endl;
+        cout << "cmd_vel.linear.x: "<< cmd_vel.linear.x << endl;
         cmd_vel_.publish(cmd_vel);
         planpub(goal, transformStamped);
         // const geometry_msgs::PoseStamped& current_position = pose;
@@ -108,9 +113,7 @@ double Move_waypoints::turn2goal(const geometry_msgs::TransformStamped &transfor
     temp2 = goal.pose.position.y - transformStamped.transform.translation.y;
     goal_head = (atan2(temp2, temp1) - yaw);
 
-    //cout << "cout << goal_head << endl: "<<goal_head << endl;
-    //cout << "atan2(temp2, temp1): "<<atan2(temp2, temp1) << endl;
-    //cout << "yaw: "<<yaw << endl;
+
     if (goal_head < -M_PI)
     {
         goal_head = (M_PI*2 - goal_head);
@@ -124,12 +127,15 @@ double Move_waypoints::turn2goal(const geometry_msgs::TransformStamped &transfor
     else if (abs(goal_head) < 0.05 && state_ == 0) state_++;
     
     
-    if (goal_head < 0){
-        goal_head = (atan(2*x-3.14)+1.6)/4;
+    if (goal_head > 0){
+        goal_head = (atan(2*goal_head-3.14)+2)/6 - 0.1*state_;
     }
     else {
-        goal_head = -(atan(2*(-x1)-3.14)+1.5)/4;
+        goal_head = -(atan(2*(-goal_head)-3.14)+2)/6 + 0.1*state_;
     }
+    //cout << "cout << goal_head << endl: "<<goal_head << endl;
+    //cout << "atan2(temp2, temp1): "<<atan2(temp2, temp1) << endl;
+    //cout << "yaw: "<<yaw << endl;
     
     return goal_head;
 }
@@ -153,11 +159,12 @@ double Move_waypoints::endturn(const geometry_msgs::TransformStamped &transformS
 
     if (abs(goal_head) < 0.05 && state_ == 2) state_++;
     
-    if (goal_head < 0){
-        goal_head = (atan(2*x-3.14)+1.6)/4;
+    if (goal_head > 0){
+        goal_head = (atan(2*goal_head-3.14)+2)/6;
     }
     else {
-        goal_head = -(atan(2*(-x1)-3.14)+1.5)/4;
+        goal_head = -(atan(2*(-goal_head)-3.14)+2)/6;
+    }
 
     return goal_head;
 }
